@@ -17,12 +17,10 @@ import (
 
 var userCollection *mongo.Collection
 
-// InitializeUserDatabase initializes the MongoDB collection.
 func InitializeUserDatabase(Collection *mongo.Collection) {
 	userCollection = Collection
 }
 
-// CreateUserHandler creates a new user in the database.
 func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 	var user Mongo.User
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
@@ -99,7 +97,7 @@ func GetAllUserHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetUserHandler(w http.ResponseWriter, r *http.Request) {
-	// Set response content type
+
 	w.Header().Set("Content-Type", "application/json")
 
 	vars := mux.Vars(r)
@@ -133,24 +131,20 @@ func UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	filter := bson.D{{Key: "emp_id", Value: empid}}
 
-	// Decode the request body to get update data
 	var updateData map[string]interface{}
 	if err := json.NewDecoder(r.Body).Decode(&updateData); err != nil {
 		http.Error(w, "Invalid request body: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	// Create the update document
 	update := bson.D{{Key: "$set", Value: updateData}}
 
-	// Perform the update operation
 	updateResult, err := userCollection.UpdateOne(ctx, filter, update)
 	if err != nil {
 		http.Error(w, "Failed to update the user: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	// Send the update result as the response
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"matchedCount":  updateResult.MatchedCount,
 		"modifiedCount": updateResult.ModifiedCount,
